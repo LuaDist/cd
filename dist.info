@@ -1,0 +1,15 @@
+--- This file is part of LuaDist project
+
+name = "cd"
+version = "5.5"
+
+desc = "CD (Canvas Draw) is a platform-independent graphics library."
+author = "Marcelo Gattass, Luiz Henrique de Figueiredo, Luiz Fernando Martha, Antonio Scuri"
+license = "Tecgraf Library License/MIT"
+url = "http://www.tecgraf.puc-rio.br/cd"
+maintainer = "Peter Kapec"
+
+depends = {
+	"lua ~> 5.1",
+	"im >= 3.8",
+}

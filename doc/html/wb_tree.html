@@ -1,0 +1,564 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Strict//EN">
+<html>
+<head>
+  <meta http-equiv="Content-Language" content="en-us" >
+  <title>Tree</title>
+  <base target="wb_cont">
+  <style type="text/css">
+  .tree { font-family: helvetica, sans-serif; font-size: 10pt; }
+  .tree h3 {
+    margin: 5px 0px 0px 0px;
+    font-size: 12pt;
+  }
+  .tree p { margin: 0px; white-space: nowrap; }
+  .tree p.sep { margin: 0px; white-space: nowrap; line-height: 8px; font-size: 5px; }
+  .tree div { display: none; margin: 0px; }
+  .tree img { vertical-align: middle; }
+  .tree a.el { text-decoration: none; margin-left: 4px; color: #003366; }
+  .tree a:hover { text-decoration: none; background-color: #e0e0ff }
+  </style>
+  <script type="text/javascript">
+  lastLink = null;
+  
+  function hideFolder(folder, id) 
+  {
+    var imageNode = document.images["img" + id];
+    if (imageNode != null) 
+    {
+      var len = imageNode.src.length;
+      if (imageNode.src.substring(len-8,len-4) == "last")
+        imageNode.src = "wb_img/plusnodelast.png";
+      else if (imageNode.src.substring(len-8,len-4) == "node")
+        imageNode.src = "wb_img/plusnode.png";
+    }                          
+    folder.style.display = "none";
+  }
+  
+  function showFolder(folder, id) 
+  {
+    var imageNode = document.images["img" + id];
+    if (imageNode != null) 
+    {
+      var len = imageNode.src.length;
+      if (imageNode.src.substring(len-8,len-4) == "last")
+        imageNode.src = "wb_img/minusnodelast.png";
+      else if (imageNode.src.substring(len-8,len-4) == "node")
+        imageNode.src = "wb_img/minusnode.png";
+    }
+    folder.style.display = "block";
+  }    
+
+  function toggleFolder(id) 
+  {
+    var folder = document.getElementById(id);
+    if (folder.style.display == "block") 
+      hideFolder(folder, id);
+    else 
+      showFolder(folder, id);
+  }
+  
+  function setFoldersAtLevel(level, show) 
+  {                                    
+    var i = 1;
+    do
+    {
+      var folder_id = level + "." + i;
+      var id = "folder" + folder_id;
+      var folder = document.getElementById(id);
+      if (folder != null)
+      {
+        setFoldersAtLevel(folder_id, show);
+        
+        if (show)
+          showFolder(folder, id);
+        else
+          hideFolder(folder, id);
+      }
+      i++;
+    } while(folder != null);
+  }
+    
+  function showAllFolders() 
+  {                                    
+    setFoldersAtLevel("", true); 
+  }
+  
+  function hideAllFolders() 
+  {                                    
+    setFoldersAtLevel("", false); 
+  }
+  
+  function getFolderId(name)
+  {  
+    return name.substring(name.indexOf("folder"), name.length);
+  }
+  
+  function showFolderRec(id)
+  {
+    var folder = document.getElementById(id);
+    if (folder != null)
+    {
+      showFolder(folder, id);
+      
+      var parent_id = id.substring(0, id.lastIndexOf("."))
+      if (parent_id != null && parent_id != "folder")
+      {
+         showFolderRec(parent_id)
+      }
+    }
+  }           
+  
+  function clearLastLink()
+  {
+    if (lastLink != null)
+    {
+      lastLink.style.color = ""  
+      lastLink = null;
+    }
+  }                 
+  
+  function goToLink(link)
+  {                  
+    var id = getFolderId(link.name);
+    showFolderRec(id);
+    location.hash = "#" + link.name;
+    link.style.color = "#ff0000";  
+    
+    clearLastLink();
+    lastLink = link;
+  }
+
+  function syncContents()
+  {
+    var cur_topic = parent.wb_cont.location.href 
+    
+    for (var i = 0; i < document.links.length; i++) 
+    {      
+      var link = document.links[i];
+      if (cur_topic == link.href)
+      {                  
+        goToLink(link)
+        return
+      }
+    }                                 
+  }
+  
+  function nextContents()
+  {
+    var cur_topic = parent.wb_cont.location.href 
+                                                
+    for (var i = 0; i < document.links.length; i++) 
+    {      
+      var link = document.links[i];
+      if (cur_topic == link.href)
+      {        
+        if (i == document.links.length-1)
+          link = document.links[0];
+        else
+          link = document.links[i+1];  
+          
+        goToLink(link)
+        parent.wb_cont.location.href = link.href;
+        return
+      }
+    }                                 
+  }
+  
+  function prevContents()
+  {
+    var cur_topic = parent.wb_cont.location.href 
+    var prev_link = document.links[document.links.length-1]
+    
+    for (var i = 0; i < document.links.length; i++) 
+    {      
+      var link = document.links[i];
+      if (cur_topic == link.href)
+      {        
+        if (i == 0)
+          link = document.links[document.links.length-1];
+        else
+          link = document.links[i-1];
+          
+        goToLink(link)
+        parent.wb_cont.location.href = link.href;
+        return
+      }
+    }                                 
+  }
+    
+  function showStartPage()
+  {
+    var full_url = parent.document.URL;
+    if (full_url == null)
+      return; 
+      
+    var param = full_url.substring(full_url.indexOf("?") + 1, full_url.length);
+    if (param == null)
+      return;
+      
+    var param_url = param.substring(param.indexOf("url=") + 4, param.length);
+    if (param_url == null)
+      return;
+                                        
+    var param_len = param_url.length;                                    
+    for (var i = 0; i < document.links.length; i++) 
+    {      
+      var link = document.links[i];
+      var link_url = link.href.substring(link.href.length-param_len, link.href.length)
+      if (link_url == param_url)
+      {
+        goToLink(link)
+        parent.wb_cont.location.href = link.href;
+        return
+      }
+    }                                 
+  }
+  </script>
+</head>
+
+<body style="margin: 2px; background-color: #F1F1F1" onload="showStartPage()"> 
+  <div class="tree" onmouseout="clearLastLink()">
+    <h3><a name="link0folder.0" class="el" href="en/home.html">CD</a></h3>
+      <p><img name="imgfolder.1" src="wb_img/minusnode.png" onclick="toggleFolder('folder.1')"><a name="link1folder.1" class="el" href="en/prod.html">Product</a></p>
+      <div id="folder.1" style="display:block">
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link2folder.1" href="en/prod.html#Overview">Overview</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link3folder.1" href="en/prod.html#Availability">Availability</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link4folder.1" href="en/prod.html#Suport">Support</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link5folder.1" href="en/prod.html#Acknowledgments">Credits</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link6folder.1" href="en/prod.html#About">Documentation</a></p>
+        <p class="sep"><img src="wb_img/sepvertline.png"><img src="wb_img/sepnode.png"></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link7folder.1" href="en/copyright.html">Copyright/License</a></p>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.1.1" src="wb_img/plusnode.png" onclick="toggleFolder('folder.1.1')"><a name="link8folder.1.1" class="el" href="en/download.html">Download</a></p>
+        <div id="folder.1.1">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link9folder.1.1" href="en/download_tips.html">Library Download Tips</a></p>
+        </div>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link10folder.1" href="en/cvs.html">CVS</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link11folder.1" href="en/history.html">History</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link12folder.1" href="en/to_do.html">To Do</a></p>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.1.2" src="wb_img/plusnode.png" onclick="toggleFolder('folder.1.2')"><a name="link13folder.1.2" class="el" href="en/screenshots.html">Screenshots</a></p>
+        <div id="folder.1.2">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link14folder.1.2" href="en/screenshots_src_c.html">C Source Code</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link15folder.1.2" href="en/screenshots_src_lua.html">Lua Source Code</a></p>
+        </div>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link16folder.1" href="en/toolkits.html">Comparing</a></p>
+      </div>
+      <p><img name="imgfolder.2" src="wb_img/plusnode.png" onclick="toggleFolder('folder.2')"><a name="link17folder.2" class="el" href="en/guide.html">Guide</a></p>
+      <div id="folder.2">
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link18folder.2" href="en/guide.html#start">Getting Started</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link19folder.2" href="en/guide.html#buildapp">Building Applications</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link20folder.2" href="en/guide.html#buildlib">Building the Library</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link21folder.2" href="en/guide.html#Environment">Environment Variables</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link22folder.2" href="en/guide.html#NewDriver">Implementing a Driver</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link23folder.2" href="en/guide.html#Play">Intercepting Primitives</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link24folder.2" href="en/guide.html#IUP">IUP Compatibility</a></p>
+        <p class="sep"><img src="wb_img/sepvertline.png"><img src="wb_img/sepnode.png"></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link25folder.2" href="en/building.html">Building in Linux</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link26folder.2" href="en/internal.html">Internal Architecture</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link27folder.2" href="en/samples.html">Samples</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link28folder.2" href="en/cdlua.html">Lua Binding</a></p>
+        <p><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link29folder.2" href="en/cdluaim.html">CDLua+IMLua</a></p>
+      </div>
+      <p class="sep"><img src="wb_img/sepnode.png"></p>
+      <p><img name="imgfolder.3" src="wb_img/plusnode.png" onclick="toggleFolder('folder.3')"><a name="link30folder.3" class="el" href="en/canvas.html">Canvas</a></p>
+      <div id="folder.3">
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.3.1" src="wb_img/plusnode.png" onclick="toggleFolder('folder.3.1')">  Initialization</p>
+        <div id="folder.3.1">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link31folder.3.1" href="en/func/init.html#cdCreateCanvas">CreateCanvas</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link32folder.3.1" href="en/func/init.html#cdCreateCanvasf">CreateCanvasf</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link33folder.3.1" href="en/func/init.html#cdKillCanvas">KillCanvas</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link34folder.3.1" href="en/func/init.html#cdCanvasActivate">Activate</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link35folder.3.1" href="en/func/init.html#cdCanvasDeactivate">Deactivate</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link36folder.3.1" href="en/func/init.html#cdUseContextPlus">UseContextPlus</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link37folder.3.1" href="en/func/init.html#cdInitContextPlus">InitContextPlus</a></p>
+          <p class="sep"><img src="wb_img/sepvertline.png"><img src="wb_img/sepvertline.png"><img src="wb_img/sepnode.png"></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link38folder.3.1" href="en/func/init.html#cdGetContext">GetContext</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link39folder.3.1" href="en/func/init.html#cdContextCaps">ContextCaps</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link40folder.3.1" href="en/func/init.html#cdContextType">ContextType</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link41folder.3.1" href="en/func/init.html#cdContextIsPlus">ContextIsPlus</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link42folder.3.1" href="en/func/init.html#cdSimulate">Simulate</a></p>
+          <p class="sep"><img src="wb_img/sepvertline.png"><img src="wb_img/sepvertline.png"><img src="wb_img/sepnode.png"></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link43folder.3.1" href="en/func/init.html#cdlua_open">cdlua_open</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link44folder.3.1" href="en/func/init.html#cdlua_close">cdlua_close</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link45folder.3.1" href="en/func/init.html#cdlua_getcanvas">cdlua_getcanvas</a></p>
+        </div>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.3.2" src="wb_img/plusnode.png" onclick="toggleFolder('folder.3.2')">  Control</p>
+        <div id="folder.3.2">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link46folder.3.2" href="en/func/control.html#cdClear">Clear</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link47folder.3.2" href="en/func/control.html#cdFlush">Flush</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link48folder.3.2" href="en/func/control.html#cdSaveState">SaveState</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link49folder.3.2" href="en/func/control.html#cdRestoreState">RestoreState</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link50folder.3.2" href="en/func/control.html#cdReleaseState">ReleaseState</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link51folder.3.2" href="en/func/control.html#cdSetAttribute">SetAttribute</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link52folder.3.2" href="en/func/control.html#cdSetfAttribute">SetfAttribute</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link53folder.3.2" href="en/func/control.html#cdGetAttribute">GetAttribute</a></p>
+        </div>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.3.3" src="wb_img/plusnode.png" onclick="toggleFolder('folder.3.3')">  Coordinate System</p>
+        <div id="folder.3.3">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link54folder.3.3" href="en/func/coordinates.html#cdGetCanvasSize">GetSize</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link55folder.3.3" href="en/func/coordinates.html#cdUpdateYAxis">UpdateYAxis</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link56folder.3.3" href="en/func/coordinates.html#cdMM2Pixel">MM2Pixel</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link57folder.3.3" href="en/func/coordinates.html#cdPixel2MM">Pixel2MM</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link58folder.3.3" href="en/func/coordinates.html#cdOrigin">Origin</a></p>
+          <p class="sep"><img src="wb_img/sepvertline.png"><img src="wb_img/sepvertline.png"><img src="wb_img/sepnode.png"></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link59folder.3.3" href="en/func/coordinates.html#cdTransform">Transform</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link60folder.3.3" href="en/func/coordinates.html#cdGetTransform">GetTransform</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link61folder.3.3" href="en/func/coordinates.html#cdTransformMultiply">TransformMultiply</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link62folder.3.3" href="en/func/coordinates.html#cdTransformTranslate">TransformTranslate</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link63folder.3.3" href="en/func/coordinates.html#cdTransformScale">TransformScale</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link64folder.3.3" href="en/func/coordinates.html#cdTransformRotate">TransformRotate</a></p>
+        </div>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.3.4" src="wb_img/plusnode.png" onclick="toggleFolder('folder.3.4')"><a name="link65folder.3.4" class="el" href="en/func/wd.html">World Coordinates</a></p>
+        <div id="folder.3.4">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link66folder.3.4" href="en/func/wd.html#wdWindow">Window</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link67folder.3.4" href="en/func/wd.html#wdGetWindow">GetWindow</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link68folder.3.4" href="en/func/wd.html#wdViewport">Viewport</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link69folder.3.4" href="en/func/wd.html#wdGetViewport">GetViewport</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link70folder.3.4" href="en/func/wd.html#wdWorld2Canvas">World2Canvas</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link71folder.3.4" href="en/func/wd.html#wdCanvas2World">Canvas2World</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link72folder.3.4" href="en/func/wd.html#wdSetTransform">SetTransform</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link73folder.3.4" href="en/func/wd.html#wdGetTransform">GetTransform</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link74folder.3.4" href="en/func/wd.html#wdTranslate">Translate</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link75folder.3.4" href="en/func/wd.html#wdScale">Scale</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img name="imgfolder.3.4.1" src="wb_img/plusnodelast.png" onclick="toggleFolder('folder.3.4.1')">  Extra</p>
+          <div id="folder.3.4.1">
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/nodelast.png"><a class="el" name="link76folder.3.4.1" href="en/func/wd.html#wdHardcopy">Hardcopy</a></p>
+          </div>
+        </div>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.3.5" src="wb_img/plusnode.png" onclick="toggleFolder('folder.3.5')">  General Attributes</p>
+        <div id="folder.3.5">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link77folder.3.5" href="en/func/attributes.html#cdForeground">Foreground</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link78folder.3.5" href="en/func/attributes.html#cdBackground">Background</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link79folder.3.5" href="en/func/attributes.html#cdWriteMode">WriteMode</a></p>
+        </div>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.3.6" src="wb_img/plusnodelast.png" onclick="toggleFolder('folder.3.6')"><a name="link80folder.3.6" class="el" href="en/func/clipping.html">Clipping</a></p>
+        <div id="folder.3.6">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link81folder.3.6" href="en/func/clipping.html#cdClip">Clip</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link82folder.3.6" href="en/func/clipping.html#cdClipArea">ClipArea</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link83folder.3.6" href="en/func/clipping.html#cdGetClipArea">GetClipArea</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link84folder.3.6" href="en/func/clipping.html#Polygons">Polygons</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img name="imgfolder.3.6.1" src="wb_img/plusnodelast.png" onclick="toggleFolder('folder.3.6.1')"><a name="link85folder.3.6.1" class="el" href="en/func/region.html">Regions</a></p>
+          <div id="folder.3.6.1">
+            <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link86folder.3.6.1" href="en/func/region.html#Creating">Creating</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link87folder.3.6.1" href="en/func/region.html#cdRegionCombineMode">RegionCombineMode</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link88folder.3.6.1" href="en/func/region.html#cdRegionCombineMode">RegionCombineMode</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link89folder.3.6.1" href="en/func/region.html#cdPointInRegion">PointInRegion</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link90folder.3.6.1" href="en/func/region.html#cdOffsetRegion">OffsetRegion</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/blank.png"><img src="wb_img/nodelast.png"><a class="el" name="link91folder.3.6.1" href="en/func/region.html#cdRegionBox">RegionBox</a></p>
+          </div>
+        </div>
+      </div>
+      <p><img name="imgfolder.4" src="wb_img/plusnode.png" onclick="toggleFolder('folder.4')">  Primitives</p>
+      <div id="folder.4">
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.4.1" src="wb_img/plusnode.png" onclick="toggleFolder('folder.4.1')"><a name="link92folder.4.1" class="el" href="en/func/marks.html">Marks</a></p>
+        <div id="folder.4.1">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link93folder.4.1" href="en/func/marks.html#cdPixel">Pixel</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link94folder.4.1" href="en/func/marks.html#cdMark">Mark</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img name="imgfolder.4.1.1" src="wb_img/plusnodelast.png" onclick="toggleFolder('folder.4.1.1')">  Attributes</p>
+          <div id="folder.4.1.1">
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link95folder.4.1.1" href="en/func/marks.html#cdMarkType">MarkType</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/nodelast.png"><a class="el" name="link96folder.4.1.1" href="en/func/marks.html#cdMarkSize">MarkSize</a></p>
+          </div>
+        </div>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.4.2" src="wb_img/plusnode.png" onclick="toggleFolder('folder.4.2')"><a name="link97folder.4.2" class="el" href="en/func/lines.html">Lines</a></p>
+        <div id="folder.4.2">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link98folder.4.2" href="en/func/lines.html#cdLine">Line</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img name="imgfolder.4.2.1" src="wb_img/plusnode.png" onclick="toggleFolder('folder.4.2.1')"><a name="link99folder.4.2.1" class="el" href="en/func/lines.html#Polygons">Line Polygons/Bezier Curves</a></p>
+          <div id="folder.4.2.1">
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link100folder.4.2.1" href="en/func/polygon.html">Polygons and Regions</a></p>
+          </div>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link101folder.4.2" href="en/func/lines.html#cdRect">Rect</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link102folder.4.2" href="en/func/lines.html#cdArc">Arc</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img name="imgfolder.4.2.2" src="wb_img/plusnodelast.png" onclick="toggleFolder('folder.4.2.2')">  Attributes</p>
+          <div id="folder.4.2.2">
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link103folder.4.2.2" href="en/func/lines.html#cdLineStyle">LineStyle</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link104folder.4.2.2" href="en/func/lines.html#cdLineStyleDashes">LineStyleDashes</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link105folder.4.2.2" href="en/func/lines.html#cdLineWidth">LineWidth</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link106folder.4.2.2" href="en/func/lines.html#cdLineJoin">LineJoin</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/nodelast.png"><a class="el" name="link107folder.4.2.2" href="en/func/lines.html#cdLineCap">LineCap</a></p>
+          </div>
+        </div>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.4.3" src="wb_img/plusnode.png" onclick="toggleFolder('folder.4.3')"><a name="link108folder.4.3" class="el" href="en/func/filled.html">Filled Areas</a></p>
+        <div id="folder.4.3">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link109folder.4.3" href="en/func/filled.html#Polygons">Polygons</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link110folder.4.3" href="en/func/filled.html#cdBox">Box</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link111folder.4.3" href="en/func/filled.html#cdSector">Sector</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link112folder.4.3" href="en/func/filled.html#cdChord">Chord</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img name="imgfolder.4.3.1" src="wb_img/plusnode.png" onclick="toggleFolder('folder.4.3.1')">  Attributes</p>
+          <div id="folder.4.3.1">
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link113folder.4.3.1" href="en/func/filled.html#cdBackOpacity">BackOpacity</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link114folder.4.3.1" href="en/func/filled.html#cdFillMode">FillMode</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link115folder.4.3.1" href="en/func/filled.html#cdInteriorStyle">InteriorStyle</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link116folder.4.3.1" href="en/func/filled.html#cdHatch">Hatch</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link117folder.4.3.1" href="en/func/filled.html#cdStipple">Stipple</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link118folder.4.3.1" href="en/func/filled.html#wdStipple">Stipple (WC)</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link119folder.4.3.1" href="en/func/filled.html#cdGetStipple">GetStipple</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link120folder.4.3.1" href="en/func/filled.html#cdPattern">Pattern</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link121folder.4.3.1" href="en/func/filled.html#wdPattern">Pattern (WC)</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link122folder.4.3.1" href="en/func/filled.html#cdGetPattern">GetPattern</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link123folder.4.3.1" href="en/func/filled.html#DataAccess">Data Access</a></p>
+          </div>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img name="imgfolder.4.3.2" src="wb_img/plusnodelast.png" onclick="toggleFolder('folder.4.3.2')">  Extras in Lua</p>
+          <div id="folder.4.3.2">
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link124folder.4.3.2" href="en/func/filled.html#cdCreatePattern">CreatePattern</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link125folder.4.3.2" href="en/func/filled.html#cdKillPattern">KillPattern</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link126folder.4.3.2" href="en/func/filled.html#cdCreateStipple">CreateStipple</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/nodelast.png"><a class="el" name="link127folder.4.3.2" href="en/func/filled.html#cdKillStipple">KillStipple</a></p>
+          </div>
+        </div>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.4.4" src="wb_img/plusnode.png" onclick="toggleFolder('folder.4.4')"><a name="link128folder.4.4" class="el" href="en/func/text.html">Text</a></p>
+        <div id="folder.4.4">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link129folder.4.4" href="en/func/text.html#cdText">Text</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img name="imgfolder.4.4.1" src="wb_img/plusnode.png" onclick="toggleFolder('folder.4.4.1')">  Attributes</p>
+          <div id="folder.4.4.1">
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link130folder.4.4.1" href="en/func/text.html#cdFont">Font</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link131folder.4.4.1" href="en/func/text.html#cdGetFont">GetFont</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link132folder.4.4.1" href="en/func/text.html#cdNativeFont">NativeFont</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link133folder.4.4.1" href="en/func/text.html#cdTextAlignment">TextAlignment</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link134folder.4.4.1" href="en/func/text.html#cdTextOrientation">TextOrientation</a></p>
+          </div>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img name="imgfolder.4.4.2" src="wb_img/plusnodelast.png" onclick="toggleFolder('folder.4.4.2')">  Properties</p>
+          <div id="folder.4.4.2">
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link135folder.4.4.2" href="en/func/text.html#cdFontDim">GetFontDim</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link136folder.4.4.2" href="en/func/text.html#cdTextSize">GetTextSize</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link137folder.4.4.2" href="en/func/text.html#cdTextBounds">GetTextBounds</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/nodelast.png"><a class="el" name="link138folder.4.4.2" href="en/func/text.html#cdTextBox">GetTextBox</a></p>
+          </div>
+        </div>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.4.5" src="wb_img/plusnode.png" onclick="toggleFolder('folder.4.5')"><a name="link139folder.4.5" class="el" href="en/func/vectortext.html">Vector Text</a></p>
+        <div id="folder.4.5">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link140folder.4.5" href="en/func/vectortext.html#cdVectorText">VectorText</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img name="imgfolder.4.5.1" src="wb_img/plusnode.png" onclick="toggleFolder('folder.4.5.1')">  Attributes</p>
+          <div id="folder.4.5.1">
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link141folder.4.5.1" href="en/func/vectortext.html#cdVectorTextDirection">VectorTextDirection</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link142folder.4.5.1" href="en/func/vectortext.html#cdVectorTextTransform">VectorTextTransform</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link143folder.4.5.1" href="en/func/vectortext.html#cdVectorTextSize">VectorTextSize</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link144folder.4.5.1" href="en/func/vectortext.html#cdVectorCharSize">VectorCharSize</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link145folder.4.5.1" href="en/func/vectortext.html#cdVectorFont">VectorFont</a></p>
+          </div>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img name="imgfolder.4.5.2" src="wb_img/plusnodelast.png" onclick="toggleFolder('folder.4.5.2')">  Properties</p>
+          <div id="folder.4.5.2">
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link146folder.4.5.2" href="en/func/vectortext.html#cdGetVectorTextSize">GetVectorTextSize</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link147folder.4.5.2" href="en/func/vectortext.html#cdGetVectorTextBounds">GetVectorTextBounds</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/nodelast.png"><a class="el" name="link148folder.4.5.2" href="en/func/vectortext.html#cdGetVectorTextBox">GetVectorTextBox</a></p>
+          </div>
+        </div>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.4.6" src="wb_img/plusnode.png" onclick="toggleFolder('folder.4.6')"><a name="link149folder.4.6" class="el" href="en/func/client.html">Client Images</a></p>
+        <div id="folder.4.6">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link150folder.4.6" href="en/func/client.html#cdGetImageRGB">GetImageRGB</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link151folder.4.6" href="en/func/client.html#cdPutImageRectRGB">PutImageRectRGB</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link152folder.4.6" href="en/func/client.html#cdPutImageRectRGBA">PutImageRectRGBA</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link153folder.4.6" href="en/func/client.html#cdPutImageRectMap">PutImageRectMap</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link154folder.4.6" href="en/func/client.html#cdRGB2Map">RGB2Map</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img name="imgfolder.4.6.1" src="wb_img/plusnode.png" onclick="toggleFolder('folder.4.6.1')">  Extras</p>
+          <div id="folder.4.6.1">
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link155folder.4.6.1" href="en/func/client.html#cdCreateBitmap">CreateBitmap</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link156folder.4.6.1" href="en/func/client.html#cdInitBitmap">InitBitmap</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link157folder.4.6.1" href="en/func/client.html#cdKillBitmap">KillBitmap</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link158folder.4.6.1" href="en/func/client.html#cdBitmapGetData">BitmapGetData</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link159folder.4.6.1" href="en/func/client.html#cdBitmapSetRect">BitmapSetRect</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link160folder.4.6.1" href="en/func/client.html#cdGetBitmap">GetBitmap</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link161folder.4.6.1" href="en/func/client.html#cdPutBitmap">PutBitmap</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link162folder.4.6.1" href="en/func/client.html#cdBitmapRGB2Map">BitmapRGB2Map</a></p>
+          </div>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img name="imgfolder.4.6.2" src="wb_img/plusnodelast.png" onclick="toggleFolder('folder.4.6.2')">  Extras in Lua</p>
+          <div id="folder.4.6.2">
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link163folder.4.6.2" href="en/func/client.html#cdCreateImageRGB">CreateImageRGB</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link164folder.4.6.2" href="en/func/client.html#cdKillImageRGB">KillImageRGB</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link165folder.4.6.2" href="en/func/client.html#cdCreateImageRGBA">CreateImageRGBA</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link166folder.4.6.2" href="en/func/client.html#cdKillImageRGBA">KillImageRGBA</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link167folder.4.6.2" href="en/func/client.html#cdCreateImageMap">CreateImageMap</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link168folder.4.6.2" href="en/func/client.html#cdKillImageMap">KillImageMap</a></p>
+            <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/nodelast.png"><a class="el" name="link169folder.4.6.2" href="en/func/client.html#DataAccess">Data Access</a></p>
+          </div>
+        </div>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.4.7" src="wb_img/plusnodelast.png" onclick="toggleFolder('folder.4.7')"><a name="link170folder.4.7" class="el" href="en/func/server.html">Server Images</a></p>
+        <div id="folder.4.7">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link171folder.4.7" href="en/func/server.html#cdCreateImage">CreateImage</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link172folder.4.7" href="en/func/server.html#cdKillImage">KillImage</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link173folder.4.7" href="en/func/server.html#cdGetImage">GetImage</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link174folder.4.7" href="en/func/server.html#cdPutImageRect">PutImageRect</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/nodelast.png"><a class="el" name="link175folder.4.7" href="en/func/server.html#cdScrollArea">ScrollArea</a></p>
+        </div>
+      </div>
+      <p><img name="imgfolder.5" src="wb_img/plusnode.png" onclick="toggleFolder('folder.5')">  Other</p>
+      <div id="folder.5">
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.5.1" src="wb_img/plusnode.png" onclick="toggleFolder('folder.5.1')">  System</p>
+        <div id="folder.5.1">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link176folder.5.1" href="en/func/other.html#cdVersion">Version</a></p>
+        </div>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.5.2" src="wb_img/plusnode.png" onclick="toggleFolder('folder.5.2')">  Metafile Interpretation</p>
+        <div id="folder.5.2">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link177folder.5.2" href="en/func/other.html#cdPlay">Play</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link178folder.5.2" href="en/func/other.html#cdRegisterCallback">RegisterCallback</a></p>
+        </div>
+        <p><img src="wb_img/vertline.png"><img name="imgfolder.5.3" src="wb_img/plusnodelast.png" onclick="toggleFolder('folder.5.3')">  Color Coding</p>
+        <div id="folder.5.3">
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link179folder.5.3" href="en/func/color.html#cdEncodeColor">EncodeColor</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link180folder.5.3" href="en/func/color.html#cdDecodeColor">DecodeColor</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link181folder.5.3" href="en/func/color.html#cdEncodeAlpha">EncodeAlpha</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link182folder.5.3" href="en/func/color.html#cdDecodeAlpha">DecodeAlpha</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link183folder.5.3" href="en/func/color.html#cdRed">Red</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link184folder.5.3" href="en/func/color.html#cdGreen">Green</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link185folder.5.3" href="en/func/color.html#cdBlue">Blue</a></p>
+          <p class="sep"><img src="wb_img/sepvertline.png"><img src="wb_img/sepblank.png"><img src="wb_img/sepnode.png"></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link186folder.5.3" href="en/func/color.html#cdGetColorPlanes">GetColorPlanes</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link187folder.5.3" href="en/func/color.html#cdPalette">Palette</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link188folder.5.3" href="en/func/color.html#cdCreatePalette">CreatePalette</a></p>
+          <p><img src="wb_img/vertline.png"><img src="wb_img/blank.png"><img src="wb_img/nodelast.png"><a class="el" name="link189folder.5.3" href="en/func/color.html#cdKillPalette">KillPalette</a></p>
+        </div>
+      </div>
+      <p class="sep"><img src="wb_img/sepnode.png"></p>
+      <p><img name="imgfolder.6" src="wb_img/plusnodelast.png" onclick="toggleFolder('folder.6')"><a name="link190folder.6" class="el" href="en/drv.html">Drivers</a></p>
+      <div id="folder.6">
+        <p><img src="wb_img/blank.png"><img name="imgfolder.6.1" src="wb_img/plusnode.png" onclick="toggleFolder('folder.6.1')">  Window Systems</p>
+        <div id="folder.6.1">
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link191folder.6.1" href="en/drv/iup.html">IUP</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link192folder.6.1" href="en/drv/native.html">Native Window</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link193folder.6.1" href="en/drv/gl.html">OpenGL</a></p>
+        </div>
+        <p><img src="wb_img/blank.png"><img name="imgfolder.6.2" src="wb_img/plusnode.png" onclick="toggleFolder('folder.6.2')">  Devices</p>
+        <div id="folder.6.2">
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link194folder.6.2" href="en/drv/clipbd.html">Clipboard</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link195folder.6.2" href="en/drv/printer.html">Printer</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link196folder.6.2" href="en/drv/picture.html">Picture</a></p>
+        </div>
+        <p><img src="wb_img/blank.png"><img name="imgfolder.6.3" src="wb_img/plusnode.png" onclick="toggleFolder('folder.6.3')">  Images</p>
+        <div id="folder.6.3">
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link197folder.6.3" href="en/drv/irgb.html">Client Image</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link198folder.6.3" href="en/drv/image.html">Server Image</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link199folder.6.3" href="en/drv/dbufrgb.html">Client Double Buffer</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link200folder.6.3" href="en/drv/dbuf.html">Server Double Buffer</a></p>
+        </div>
+        <p><img src="wb_img/blank.png"><img name="imgfolder.6.4" src="wb_img/plusnode.png" onclick="toggleFolder('folder.6.4')">  File</p>
+        <div id="folder.6.4">
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link201folder.6.4" href="en/drv/pdf.html">PDF</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link202folder.6.4" href="en/drv/ps.html">PS</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link203folder.6.4" href="en/drv/svg.html">SVG</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link204folder.6.4" href="en/drv/mf.html">MF</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link205folder.6.4" href="en/drv/debug.html">DEBUG</a></p>
+          <p class="sep"><img src="wb_img/sepblank.png"><img src="wb_img/sepvertline.png"><img src="wb_img/sepnode.png"></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link206folder.6.4" href="en/drv/cgm.html">CGM</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link207folder.6.4" href="en/drv/dgn.html">DGN</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link208folder.6.4" href="en/drv/dxf.html">DXF</a></p>
+          <p class="sep"><img src="wb_img/sepblank.png"><img src="wb_img/sepvertline.png"><img src="wb_img/sepnode.png"></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link209folder.6.4" href="en/drv/emf.html">EMF</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link210folder.6.4" href="en/drv/wmf.html">WMF</a></p>
+        </div>
+        <p><img src="wb_img/blank.png"><img name="imgfolder.6.5" src="wb_img/plusnode.png" onclick="toggleFolder('folder.6.5')">  Base Drivers</p>
+        <div id="folder.6.5">
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link211folder.6.5" href="en/drv/gdk.html">GDK</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link212folder.6.5" href="en/drv/win32.html">GDI</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/node.png"><a class="el" name="link213folder.6.5" href="en/drv/xwin.html">X-Win</a></p>
+          <p class="sep"><img src="wb_img/sepblank.png"><img src="wb_img/sepvertline.png"><img src="wb_img/sepnode.png"></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/vertline.png"><img src="wb_img/nodelast.png"><a class="el" name="link214folder.6.5" href="en/drv/sim.html">Simulation</a></p>
+        </div>
+        <p><img src="wb_img/blank.png"><img name="imgfolder.6.6" src="wb_img/plusnodelast.png" onclick="toggleFolder('folder.6.6')">  Context Plus</p>
+        <div id="folder.6.6">
+          <p><img src="wb_img/blank.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link215folder.6.6" href="en/drv/cairo.html">Cairo</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/blank.png"><img src="wb_img/node.png"><a class="el" name="link216folder.6.6" href="en/drv/gdiplus.html">GDI+</a></p>
+          <p><img src="wb_img/blank.png"><img src="wb_img/blank.png"><img src="wb_img/nodelast.png"><a class="el" name="link217folder.6.6" href="en/drv/xrender.html">XRender</a></p>
+        </div>
+      </div>
+  </div>
+</body>
+</html>

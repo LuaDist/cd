@@ -1,0 +1,79 @@
+[OPTIONS]
+  Binary Index=No
+  Compatibility=1.0
+  Compiled file=cd_en.chm
+  Contents file=wb_tree_en.hhc
+  Default topic=en/home.html
+  Display compile notes=Yes
+  Display compile progress=Yes
+  Full-text search=Yes
+  Language=0x0409 English - United States
+  Title=CD - Canvas Draw
+
+[FILES]
+  en/home.html
+  en/history.html
+  en/drv/xrender.html
+  en/building.html
+  en/drv/gdiplus.html
+  en/drv/debug.html
+  en/func/server.html
+  en/func/wd.html
+  en/func/client.html
+  en/func/region.html
+  en/drv/cairo.html
+  en/drv/sim.html
+  en/drv/xwin.html
+  en/drv/native.html
+  en/func/control.html
+  en/screenshots_src_lua.html
+  en/drv/win32.html
+  en/drv/gdk.html
+  en/func/vectortext.html
+  en/cvs.html
+  en/func/init.html
+  en/drv/pdf.html
+  en/drv/picture.html
+  en/func/attributes.html
+  en/drv/emf.html
+  en/func/text.html
+  en/func/filled.html
+  en/prod.html
+  en/screenshots.html
+  en/samples.html
+  en/drv/dbufrgb.html
+  en/func/color.html
+  en/to_do.html
+  en/drv/cgm.html
+  en/drv.html
+  en/drv/mf.html
+  en/drv/irgb.html
+  en/drv/ps.html
+  en/drv/wmf.html
+  en/download.html
+  en/drv/dxf.html
+  en/copyright.html
+  en/drv/gl.html
+  en/drv/svg.html
+  en/screenshots_src_c.html
+  en/drv/printer.html
+  en/cdluaim.html
+  en/guide.html
+  en/drv/dgn.html
+  en/drv/image.html
+  en/drv/iup.html
+  en/cdlua.html
+  en/drv/clipbd.html
+  en/func/marks.html
+  en/func/lines.html
+  en/func/polygon.html
+  en/drv/dbuf.html
+  en/func/other.html
+  en/toolkits.html
+  en/func/clipping.html
+  en/download_tips.html
+  en/canvas.html
+  en/internal.html
+  en/func/coordinates.html
+[INFOTYPES]
+  
