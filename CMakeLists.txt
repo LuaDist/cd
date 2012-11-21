@@ -278,12 +278,15 @@ endif ( )
 
 # cdgl lib
 if ( OPENGL_FOUND )
+  find_package ( Iconv REQUIRED )
+  include_directories ( ${ICONV_INCLUDE_DIR} )
+  
   add_library ( cdgl SHARED src/drv/gl/cdgl.c resources/cdgl.def )
 
   add_dependencies ( cdgl ftgl )
   target_link_libraries ( cdgl ftgl cd )
   if(APPLE)
-	target_link_libraries ( cdgl iconv ${FONTCONFIG_LIBRARIES})
+	target_link_libraries ( cdgl ${ICONV_LIBRARY} ${FONTCONFIG_LIBRARIES} )
   endif()
   set ( CDGL_LIB cdgl )
 endif ( )
