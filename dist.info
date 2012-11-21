@@ -12,5 +12,5 @@ maintainer = "Peter Kapec"
 depends = {
 	"lua ~> 5.1",
 	"im >= 3.8",
-  "iconv >= 1.0"
+  "libiconv >= 1.0"
 }
