@@ -1,0 +1,160 @@
+<!doctype HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>GL</title>
+<link rel="stylesheet" type="text/css" href="../../style.css">
+<style type="text/css">
+.style1 {
+	margin-top: 0px;
+}
+.style2 {
+	font-family: Courier;
+}
+</style>
+</head>
+
+<body>
+
+<h2>GL Driver</h2>
+
+  <p>This driver represents a driver for drawing using
+	<a href="http://www.opengl.org/">
+  OpenGL</a>. The implementation uses the OpenGL functions only. 
+  For the font support, this driver uses the
+  <a href="http://homepages.paradise.net.nz/henryj/code/index.html#FTGL">FTGL</a> 
+  API functions, which it was written against the
+  <a href="http://www.freetype.org/">Free Type</a> library.</p>
+<p>The driver is not dependent of system functions. It uses only the OpenGL 
+portable functions. So if the window canvas changes its size the attribute &quot;SIZE&quot; 
+must be set with the new size or cdCanvasGetSize will return an incorrect value.</p>
+
+<h3>Use</h3>
+
+  <p>The canvas is created by means of a call to the function <font face="Courier">
+  <a href="../func/init.html#cdCreateCanvas"><strong>cdCreateCanvas</strong></a>(CD_GL, 
+  Data)</font>, after which other functions in the CD library can be called as usual. The <font face="Courier">Data</font> parameter string has the following format:</p>
+  
+    <pre><em>&quot;width<strong>x</strong>height [resolution]&quot;</em>      in C &quot;<em><strong><tt>%dx%d %g&quot;</tt></strong></em></pre>
+  
+  <p>It must include the initial canvas' dimensions.<font face="Courier"> Width</font> and <font face="Courier">height</font> 
+  are provided in pixels (note the lowercase &quot;x&quot; between them). The 
+	resolution is optional, its default value is &quot;3.78 pixels/mm&quot; (96 DPI).</p>
+  
+
+
+  <p>To use this driver, the application must be linked with the &quot;<strong>cdgl</strong>&quot;, 
+	the ftgl library 
+	and the OpenGL library. The FTGL library is dependent also on the GLU 
+	library. In UNIX <strong>cdgl</strong> is also dependent on <strong>iconv</strong>.</p>
+  <p>In Lua, it is necessary to call function <font face="Courier"> <strong>cdluagl_open() </strong> </font>after a call 
+  to function <strong><font face="Courier">cdlua_open()</font></strong>, apart from linking with the &quot;<strong><font face="Courier">cdluagl</font></strong>&quot; 
+  library. This is not necessary if you do require&quot;cdluagl&quot;.&nbsp;</p>
+
+<h3>Behavior of Functions</h3>
+<h4>Control&nbsp; </h4>
+<ul>
+  <li><a href="../func/other.html#cdPlay">
+  <font face="Courier"><strong>Play</strong></font></a>: does nothing, returns
+  <font face="Courier">CD_ERROR</font>. </li>
+</ul>
+<h4>Coordinate System and Clipping </h4>
+<ul>
+  <li>
+  <a href="../func/coordinates.html#cdUpdateYAxis">
+  <font face="Courier"><strong>UpdateYAxis</strong></font></a>: does nothing.</li>
+	<li>
+    <strong>Clipping</strong>: only support rectangular areas.</li>
+	<li>
+    <b>Complex Regions</b>: not supported.</li>
+</ul>
+<h4>Primitives</h4>
+<ul>
+  <li><a href="../func/lines.html#cdBegin">
+  <font face="Courier"><strong>Begin</strong></font></a>: <strong><tt>CD_PATH</tt></strong> 
+	is simulated. CD_FILL allows convex polygons only.</li>
+	<li>Floating point primitives are supported.</li>
+</ul>
+<h4>Client Images</h4>
+<ul>
+    <li>Images are bitmaps, and cannot be directly rotated or scaled.</li>
+</ul>
+<h4>Attributes </h4>
+<ul>
+  <li>
+  <a href="../func/lines.html#cdLineStyle">
+  <font face="Courier"><strong>LineStyle</strong></font></a>: in <strong><tt>
+  CD_CUSTOM</tt></strong>, style patterns more than 16 bits are not supported.</li>
+  <li>
+  <a href="../func/lines.html#cdLineCap">
+  <font face="Courier"><strong>LineCap</strong></font></a>: does nothing.</li>
+	<li>
+    <a href="../func/lines.html#cdLineJoin">
+  <font face="Courier"><strong>LineJoin</strong></font></a>: does nothing.</li>
+	<li class="style1">
+    <a href="../func/filled.html#cdStipple"><font face="Courier"><strong>Stipple</strong></font></a>: 
+	does nothing. There is no support for patterns more than 16 bits.</li>
+	<li class="style1">
+    <a href="../func/filled.html#cdPattern"><font face="Courier"><strong>Pattern</strong></font></a>: 
+	does nothing.</li>
+	<li class="style1">
+    <a href="../func/filled.html#cdFillMode"><font face="Courier"><strong>
+	FillMode</strong></font></a>: does nothing.</li>
+	<li>
+    <a href="../func/text.html#cdNativeFont">
+    <font face="Courier"><strong>NativeFont</strong></font></a>: also accepts the 
+  X-Windows font string format.</li>
+    <li><a href="../func/text.html#cdFont">
+  <font face="Courier"><strong>Font</strong></font></a>: In Windows, &quot;Courier&quot; is mapped to 
+	&quot;Courier New&quot;, &quot;Helvetica&quot; is mapped to &quot;Arial&quot;, and &quot;Times&quot; is mapped to 
+	&quot;Times New Roman&quot;. In UNIX, &quot;Courier&quot; is mapped to 
+	&quot;freemono&quot;, &quot;Helvetica&quot; is mapped to &quot;freesans&quot;, and &quot;Times&quot; is mapped to 
+	&quot;freeserif&quot;. Underline and Strikeout are NOT supported. If not found 
+	then the font file is searched using the same logic of the <a href="sim.html">Simulation</a> 
+	driver, but <strong>ADDFONTMAP</strong> is not supported. If still is not 
+	found then the typeface is used as file name for the font. </li>
+</ul>
+<h4>Colors </h4>
+<ul>
+  <li>
+  <a href="http://www.tecgraf.puc-rio.br/cd/en/func/color.html#cdPalette">
+  <font face="Courier"><strong>Palette</strong></font></a>: does nothing.</li>
+</ul>
+<h4>Exclusive Attributes</h4>
+
+<ul>
+  <li>&quot;<b><font face="Courier">ALPHA</font></b>&quot;:&nbsp;allows the usage of an alpha 
+	channel for the drawing shapes. Assumes values &quot;1&quot; (active) and &quot;0&quot; 
+	(inactive). Default value: &quot;1&quot;.</li>
+</ul>
+
+<ul>
+  <li>&quot;<b><font face="Courier">ANTIALIAS</font></b>&quot;:&nbsp;allows the use of 
+	anti-aliasing for the drawing shapes. Assumes values &quot;1&quot; (active) and &quot;0&quot; 
+	(inactive). Default value: &quot;1&quot;.</li>
+</ul>
+
+<ul>
+    <li><b><font face="Courier">&quot;GLVERSION&quot;: </font></b>returns a string with 
+  the OpenGL version or release number. It is empty if the OpenGL is not available.</li>
+</ul>
+
+<ul>
+  <li>&quot;<b><font face="Courier">ROTATE</font></b>&quot;:&nbsp; allows the usage of 1 
+  angle and 1 coordinate (x, y), that define a global rotation transformation 
+  centered in the specified coordinate. Use 1 real and 2 integer values inside a 
+  string (&quot;%g %d %d&quot; = angle x y).</li>
+</ul>
+
+<ul>
+  <li>&quot;<strong><span class="style2">SIZE</span></strong>&quot;: sets the canvas size. 
+	Must be used after the window is resized. The format is the same of the data 
+	parameter in cdCreateCanvas, <em>&quot;width<strong>x</strong>height [resolution]&quot;</em>      
+	or in C &quot;<em><strong><tt>%dx%d %g&quot;.</tt></strong></em></li>
+</ul>
+
+</body>
+
+</html>
